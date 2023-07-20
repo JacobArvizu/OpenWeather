@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name" translatable="false">OpenWeather</string>
+    <string name="weather_icon" translatable="false">Icon that shows displays the weather.</string>
+    <string name="enter_city" translatable="false">Enter a city</string>
+    <string name="search">Search</string>
+    <string name="city">City: %1$s</string>
+    <string name="temperature">Temperature: </string>
+    <string name="weather">Weather: </string>
+    <string name="wind_speed">Wind Speed: </string>
+    <string name="humidity">Humidity: </string>
+    <string name="clouds">Clouds: </string>
+    <string name="date">"Date: "</string>
+    <string name="temperature_format">Temperature: %.2f°F</string>
+    <string name="wind_speed_format">Wind speed: %.2f mph</string>
+    <string name="humidity_format">Humidity: %d%%</string>
+    <string name="cloudiness_format">Cloudiness: %d%%</string>
+    <string name="location">"Location: %1$s"</string>
+</resources>
