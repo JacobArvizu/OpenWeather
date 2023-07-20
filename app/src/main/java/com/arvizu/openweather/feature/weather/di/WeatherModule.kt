@@ -1,5 +1,6 @@
 package com.arvizu.openweather.feature.weather.di
 
+import com.arvizu.openweather.common.util.helpers.SharedPreferencesHelper
 import com.arvizu.openweather.feature.weather.data.datasource.WeatherDataSource
 import com.arvizu.openweather.feature.weather.data.datasource.WeatherDataSourceImpl
 import com.arvizu.openweather.feature.weather.data.mapper.WeatherResponseMapper
@@ -42,8 +43,8 @@ object WeatherModule {
      */
     @Provides
     @ViewModelScoped
-    fun provideWeatherRepository(weatherDataSource: WeatherDataSource, weatherResponseMapper: WeatherResponseMapper): WeatherRepository {
-        return WeatherRepositoryImpl(weatherDataSource, weatherResponseMapper)
+    fun provideWeatherRepository(weatherDataSource: WeatherDataSource, weatherResponseMapper: WeatherResponseMapper, sharedPreferencesHelper: SharedPreferencesHelper): WeatherRepository {
+        return WeatherRepositoryImpl(weatherDataSource, weatherResponseMapper, sharedPreferencesHelper)
     }
 
     /**

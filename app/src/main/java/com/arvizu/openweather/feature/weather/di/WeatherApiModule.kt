@@ -1,8 +1,9 @@
 package com.arvizu.openweather.feature.weather.di
 
-import com.arvizu.openweather.common.util.constants.NetworkConstants
 import com.arvizu.openweather.feature.weather.data.mapper.WeatherResponseMapper
+import com.arvizu.openweather.feature.weather.data.remote.api.ForecastResponseJsonAdapter
 import com.arvizu.openweather.feature.weather.data.remote.api.WeatherApiService
+import com.arvizu.openweather.feature.weather.data.remote.model.ForecastApiResponse
 import com.arvizu.openweather.feature.weather.util.constants.WeatherNetworkConstants
 import com.arvizu.openweather.feature.weather.util.qualifiers.WeatherApi
 import com.squareup.moshi.Moshi
@@ -27,10 +28,20 @@ object WeatherApiModule {
     @Provides
     @Singleton
     @WeatherApi
-    fun provideWeatherRetrofit(moshi: Moshi, okHttpClient: OkHttpClient): Retrofit {
+    fun provideWeatherRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
+        val forecastResponseJsonAdapter =
+            ForecastResponseJsonAdapter(
+                moshi
+            )
+
+        // Custom adapter to handle the weather api response required fields
+        val weatherMoshiInstance = moshi.newBuilder()
+            .add(ForecastApiResponse::class.java, forecastResponseJsonAdapter)
+            .build()
+
         return Retrofit.Builder()
             .baseUrl(WeatherNetworkConstants.WEATHER_BASE_URL)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addConverterFactory(MoshiConverterFactory.create(weatherMoshiInstance))
             .client(okHttpClient)
             .build()
     }

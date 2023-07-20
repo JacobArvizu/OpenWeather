@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arvizu.openweather.databinding.FragmentMainBinding
 import com.arvizu.openweather.feature.places.util.GooglePlacesClient
-import com.arvizu.openweather.feature.weather.presentation.model.WeatherUIModel
 import com.arvizu.openweather.feature.weather.presentation.ui.adapter.WeatherCardAdapter
+import com.arvizu.openweather.feature.weather.presentation.ui.adapter.model.WeatherCard
 import com.arvizu.openweather.feature.weather.presentation.ui.viewmodel.WeatherViewModel
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.TypeFilter
@@ -114,8 +114,8 @@ class WeatherFragment : Fragment() {
     }
 
     private fun observeWeather() {
-        viewModel.weather.observe(viewLifecycleOwner) { weatherResponse ->
-            updateWeather(weatherResponse)
+        viewModel.weatherCards.observe(viewLifecycleOwner) { weatherCards ->
+            updateWeather(weatherCards)
         }
         viewModel.errorObs.observe(viewLifecycleOwner) {error ->
             showError(error)
@@ -126,9 +126,9 @@ class WeatherFragment : Fragment() {
     }
 
 
-    private fun updateWeather(weather: WeatherUIModel) {
-        Timber.d("Weather: $weather")
-        weatherAdapter.submitList(listOf(weather))
+    private fun updateWeather(weatherCards: List<WeatherCard>) {
+        Timber.d("Weather: $weatherCards")
+        weatherAdapter.submitList(weatherCards)
     }
 
     private fun showError(error: Throwable?) {

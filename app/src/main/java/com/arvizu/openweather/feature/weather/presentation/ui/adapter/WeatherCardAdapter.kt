@@ -7,15 +7,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.arvizu.openweather.databinding.WeatherCardItemBinding
-import com.arvizu.openweather.feature.weather.presentation.model.WeatherUIModel
-import dagger.hilt.android.scopes.FragmentScoped
-import javax.inject.Inject
+import com.arvizu.openweather.feature.weather.presentation.ui.adapter.model.WeatherCard
 
-class WeatherCardAdapter @Inject constructor() :
-    ListAdapter<WeatherUIModel, WeatherCardAdapter.WeatherViewHolder>(WeatherDiffCallback) {
+class WeatherCardAdapter :
+    ListAdapter<WeatherCard, WeatherCardAdapter.WeatherViewHolder>(WeatherDiffCallback) {
 
     // Higher order function to handle item click
-    var onItemClick : ((item : WeatherUIModel) -> Unit)? = null
+    var onItemClick : ((item : WeatherCard) -> Unit)? = null
 
     inner class WeatherViewHolder(val binding: WeatherCardItemBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -41,12 +39,12 @@ class WeatherCardAdapter @Inject constructor() :
         }
     }
 
-    object WeatherDiffCallback : DiffUtil.ItemCallback<WeatherUIModel>() {
-        override fun areItemsTheSame(oldItem: WeatherUIModel, newItem: WeatherUIModel): Boolean {
+    object WeatherDiffCallback : DiffUtil.ItemCallback<WeatherCard>() {
+        override fun areItemsTheSame(oldItem: WeatherCard, newItem: WeatherCard): Boolean {
             return oldItem.date == newItem.date
         }
 
-        override fun areContentsTheSame(oldItem: WeatherUIModel, newItem: WeatherUIModel): Boolean {
+        override fun areContentsTheSame(oldItem: WeatherCard, newItem: WeatherCard): Boolean {
             return oldItem == newItem
         }
     }

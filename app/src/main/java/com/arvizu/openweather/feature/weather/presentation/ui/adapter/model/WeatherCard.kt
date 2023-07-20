@@ -1,6 +1,6 @@
-package com.arvizu.openweather.feature.weather.presentation.model
+package com.arvizu.openweather.feature.weather.presentation.ui.adapter.model
 
-data class WeatherUIModel(
+data class WeatherCard(
     val date: String,
     val temperature: String,
     val windSpeed: String,

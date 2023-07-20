@@ -3,7 +3,10 @@ package com.arvizu.openweather.feature.weather.data.remote.model
 
 import com.squareup.moshi.Json
 
-data class WeatherApiResponse(
+/*
+ * Api Response for the weather data.
+ */
+data class ForecastApiResponse(
     @Json(name = "base")
     val base: String?,
     @Json(name = "clouds")

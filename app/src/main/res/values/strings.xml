@@ -15,4 +15,7 @@
     <string name="humidity_format">Humidity: %d%%</string>
     <string name="cloudiness_format">Cloudiness: %d%%</string>
     <string name="location">"Location: %1$s"</string>
+    <string name="please_enter_location">Please enter a location to retrieve weather</string>
+    <string name="unit_switch">Switch units</string>
+    <string name="forecast">5 Day Forecast</string>
 </resources>

@@ -5,7 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import com.arvizu.openweather.NetworkViewModel
-import com.arvizu.openweather.feature.weather.presentation.model.WeatherUIModel
+import com.arvizu.openweather.feature.weather.presentation.ui.adapter.mapper.WeatherAdapterMapper
+import com.arvizu.openweather.feature.weather.presentation.ui.adapter.model.WeatherCard
 import com.arvizu.openweather.feature.weather.use_case.WeatherUseCases
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -17,22 +18,29 @@ import javax.inject.Inject
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     val savedStateHandle: SavedStateHandle,
-    private val weatherUseCases: WeatherUseCases
+    private val weatherUseCases: WeatherUseCases,
+    private val weatherAdapterMapper: WeatherAdapterMapper
 ) : NetworkViewModel() {
 
-    private val _weather = MutableLiveData<WeatherUIModel>()
-    val weather: LiveData<WeatherUIModel> get() = _weather
+    private val _weatherCards = MutableLiveData<List<WeatherCard>>()
+    val weatherCards: LiveData<List<WeatherCard>> = _weatherCards
 
     private val _placeAddress = MutableLiveData<String>()
     val placeAddress: LiveData<String> get() = _placeAddress
+
+    init {
+        _weatherCards.value = emptyList()
+    }
 
     // Launch the getWeather use case under the viewModel scope with the coroutine exception handler
     private fun getWeather(latLng: Pair<Double, Double>) = launchSafe {
         _loading.value = true
         when (val result = weatherUseCases.getWeather.execute(latLng)) {
             is Ok -> {
-                val uiModel = result.value
-                _weather.value = uiModel
+                val weatherCardList = result.value.map { weatherDto ->
+                    weatherAdapterMapper.mapWeatherDTOtoWeatherCard(weatherDto)
+                }
+                _weatherCards.value = weatherCardList
             }
             // Even though NetworkViewModel's coroutine exception handler serves as a safety net,
             // we should aim to capture errors here as this means we caught them in a structured manner.
