@@ -7,5 +7,6 @@ data class WeatherCard(
     val humidity: String,
     val cloudiness: String,
     val iconUrl: String,
-    val description: String
+    val description: String,
+    val timeOfDay: String
 )

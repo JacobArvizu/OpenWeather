@@ -11,5 +11,7 @@ data class WeatherDTO(
     val humidity: Int?,
     val cloudiness: Int?,
     val iconUrl: String?,
-    val description: String?
+    val description: String?,
+    val timeOfDay: String?,
+    val unit: String
 )

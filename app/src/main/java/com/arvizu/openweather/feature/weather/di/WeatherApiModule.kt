@@ -1,8 +1,10 @@
 package com.arvizu.openweather.feature.weather.di
 
 import com.arvizu.openweather.feature.weather.data.mapper.WeatherResponseMapper
+import com.arvizu.openweather.feature.weather.data.remote.api.CurrentWeatherApiResponseJsonAdapter
 import com.arvizu.openweather.feature.weather.data.remote.api.ForecastResponseJsonAdapter
 import com.arvizu.openweather.feature.weather.data.remote.api.WeatherApiService
+import com.arvizu.openweather.feature.weather.data.remote.model.CurrentWeatherApiResponse
 import com.arvizu.openweather.feature.weather.data.remote.model.ForecastApiResponse
 import com.arvizu.openweather.feature.weather.util.constants.WeatherNetworkConstants
 import com.arvizu.openweather.feature.weather.util.qualifiers.WeatherApi
@@ -34,9 +36,15 @@ object WeatherApiModule {
                 moshi
             )
 
+        val currentWeatherResponseJsonAdapter =
+            CurrentWeatherApiResponseJsonAdapter(
+                moshi
+            )
+
         // Custom adapter to handle the weather api response required fields
         val weatherMoshiInstance = moshi.newBuilder()
             .add(ForecastApiResponse::class.java, forecastResponseJsonAdapter)
+            .add(CurrentWeatherApiResponse::class.java, currentWeatherResponseJsonAdapter)
             .build()
 
         return Retrofit.Builder()

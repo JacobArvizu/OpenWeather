@@ -7,7 +7,8 @@ import com.arvizu.openweather.feature.weather.data.mapper.WeatherResponseMapper
 import com.arvizu.openweather.feature.weather.data.remote.api.WeatherApiService
 import com.arvizu.openweather.feature.weather.data.repository.WeatherRepository
 import com.arvizu.openweather.feature.weather.data.repository.WeatherRepositoryImpl
-import com.arvizu.openweather.feature.weather.use_case.GetWeatherUseCase
+import com.arvizu.openweather.feature.weather.use_case.GetCurrentWeatherUseCase
+import com.arvizu.openweather.feature.weather.use_case.GetForecastUseCase
 import com.arvizu.openweather.feature.weather.use_case.WeatherUseCases
 import dagger.Module
 import dagger.Provides
@@ -55,7 +56,8 @@ object WeatherModule {
     @ViewModelScoped
     fun provideWeatherUseCases(weatherRepository: WeatherRepository): WeatherUseCases {
         return WeatherUseCases(
-            GetWeatherUseCase(weatherRepository)
+            GetForecastUseCase(weatherRepository),
+            GetCurrentWeatherUseCase(weatherRepository)
         )
     }
 }

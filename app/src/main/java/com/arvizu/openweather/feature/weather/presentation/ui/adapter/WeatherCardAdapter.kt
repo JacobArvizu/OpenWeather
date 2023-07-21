@@ -31,8 +31,9 @@ class WeatherCardAdapter :
             temperatureTextView.text = weatherCard.temperature
             windSpeedTextView.text = weatherCard.windSpeed
             humidityTextView.text = weatherCard.humidity
-            cloudsTextView.text = weatherCard.cloudiness
-
+            cloudinessTextView.text = weatherCard.cloudiness
+            descriptionTextView.text = weatherCard.description
+            timeOfDayTextView.text = weatherCard.timeOfDay
             root.setOnClickListener {
                 onItemClick?.invoke(weatherCard)
             }

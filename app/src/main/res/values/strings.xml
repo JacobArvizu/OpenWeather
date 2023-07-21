@@ -8,7 +8,7 @@
     <string name="weather">Weather: </string>
     <string name="wind_speed">Wind Speed: </string>
     <string name="humidity">Humidity: </string>
-    <string name="clouds">Clouds: </string>
+    <string name="clouds">Cloudiness: </string>
     <string name="date">"Date: "</string>
     <string name="temperature_format">Temperature: %.2f°F</string>
     <string name="wind_speed_format">Wind speed: %.2f mph</string>
@@ -18,4 +18,7 @@
     <string name="please_enter_location">Please enter a location to retrieve weather</string>
     <string name="unit_switch">Switch units</string>
     <string name="forecast">5 Day Forecast</string>
+    <string name="time_of_day">Time of day:</string>
+    <string name="description">"Description: "</string>
+    <string name="current_weather">Current Weather</string>
 </resources>

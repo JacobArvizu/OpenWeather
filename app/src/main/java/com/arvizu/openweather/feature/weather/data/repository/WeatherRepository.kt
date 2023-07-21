@@ -4,5 +4,6 @@ import com.arvizu.openweather.feature.weather.dto.WeatherDTO
 import com.github.michaelbull.result.Result
 
 interface WeatherRepository {
-    suspend fun getWeather(latLng: Pair<Double, Double>): Result<List<WeatherDTO>, Exception>
+    suspend fun getCurrentWeather(latLng: Pair<Double, Double>): Result<WeatherDTO, Exception>
+    suspend fun getForecast(latLng: Pair<Double, Double>): Result<List<WeatherDTO>, Exception>
 }
