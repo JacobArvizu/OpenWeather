@@ -21,7 +21,6 @@ import javax.inject.Singleton
  */
 @Singleton
 class WeatherResponseMapper @Inject constructor() {
-
     fun mapToDTO(forecastApiResponse: ForecastApiResponse, timeZone: Int, unit: String): Result<WeatherDTO, Exception> {
         // The main object, date and temp should be checked in the moshi adapter however
         // include explicit checks at the data layer in case the adapter is changed.

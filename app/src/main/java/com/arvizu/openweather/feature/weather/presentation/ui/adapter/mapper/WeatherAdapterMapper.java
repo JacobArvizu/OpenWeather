@@ -1,7 +1,6 @@
 package com.arvizu.openweather.feature.weather.presentation.ui.adapter.mapper;
 
 import com.arvizu.openweather.common.util.constants.AppConstants;
-import com.arvizu.openweather.common.util.helpers.SharedPreferencesHelper;
 import com.arvizu.openweather.feature.weather.dto.WeatherDTO;
 import com.arvizu.openweather.feature.weather.presentation.ui.adapter.model.WeatherCard;
 
@@ -12,18 +11,16 @@ import javax.inject.Singleton;
 
 @Singleton
 public class WeatherAdapterMapper {
-
-    private final SharedPreferencesHelper sharedPreferencesHelper;
-
     @Inject
-    public WeatherAdapterMapper(SharedPreferencesHelper sharedPreferencesHelper) {
-        this.sharedPreferencesHelper = sharedPreferencesHelper;
+    public WeatherAdapterMapper() {
     }
 
     public WeatherCard mapWeatherDTOtoWeatherCard(WeatherDTO weatherDTO) {
 
         String temperature;
         String windSpeed;
+        // Use Optional to avoid null pointer exceptions, could use better string formatting(avoid concatenation) but
+        // okay for simple app.
         String humidity = Optional.of("Humidity: " +  weatherDTO.getHumidity()).map(h -> h + "%").orElse("N/A");
         String cloudiness = Optional.of("Cloudiness: " + weatherDTO.getCloudiness()).map(c -> c + "%").orElse("N/A");
         String description = Optional.ofNullable(weatherDTO.getDescription()).orElse("N/A");

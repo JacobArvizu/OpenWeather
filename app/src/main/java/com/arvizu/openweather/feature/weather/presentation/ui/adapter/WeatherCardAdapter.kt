@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.dispose
 import coil.load
 import com.arvizu.openweather.databinding.WeatherCardItemBinding
 import com.arvizu.openweather.feature.weather.presentation.ui.adapter.model.WeatherCard
@@ -38,6 +39,11 @@ class WeatherCardAdapter :
                 onItemClick?.invoke(weatherCard)
             }
         }
+    }
+
+    override fun onViewRecycled(holder: WeatherViewHolder) {
+        super.onViewRecycled(holder)
+        holder.binding.weatherLogoImageView.dispose()
     }
 
     object WeatherDiffCallback : DiffUtil.ItemCallback<WeatherCard>() {

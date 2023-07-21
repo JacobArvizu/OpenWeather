@@ -1,10 +1,12 @@
 package com.arvizu.openweather.feature.weather.presentation.ui.fragment
 
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -14,24 +16,31 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import com.arvizu.openweather.R
 import com.arvizu.openweather.common.util.constants.AppConstants
+import com.arvizu.openweather.common.util.helpers.FusedLocationHelper
 import com.arvizu.openweather.databinding.FragmentMainBinding
 import com.arvizu.openweather.feature.places.util.GooglePlacesClient
 import com.arvizu.openweather.feature.weather.presentation.ui.adapter.WeatherCardAdapter
 import com.arvizu.openweather.feature.weather.presentation.ui.adapter.model.WeatherCard
 import com.arvizu.openweather.feature.weather.presentation.ui.viewmodel.WeatherViewModel
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -40,6 +49,9 @@ class WeatherFragment : Fragment() {
 
     @Inject
     lateinit var placesClient: GooglePlacesClient
+
+    @Inject
+    lateinit var fusedLocationHelper: FusedLocationHelper
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
@@ -50,6 +62,16 @@ class WeatherFragment : Fragment() {
 
     private lateinit var weatherAdapter: WeatherCardAdapter
 
+    private val requestPermissionLauncher: ActivityResultLauncher<String> by lazy {
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                Timber.d("Location permission granted from request")
+                fetchLocation()
+            } else {
+                Timber.d("Location permission denied from request")
+            }
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         handlePlaceResult()
@@ -67,6 +89,7 @@ class WeatherFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initViews()
         observeWeather()
+        handleLocationCheck()
     }
 
     @SuppressLint("ClickableViewAccessibility") // No need to override the class/view for simple use case
@@ -121,6 +144,48 @@ class WeatherFragment : Fragment() {
         recyclerView.adapter = weatherAdapter
     }
 
+    private fun handleLocationCheck() {
+        when (PackageManager.PERMISSION_GRANTED) {
+            ContextCompat.checkSelfPermission(
+                requireActivity(),
+                ACCESS_FINE_LOCATION
+            ) -> {
+                fetchLocation()
+            }
+            else -> {
+                requestPermissionLauncher.launch(ACCESS_FINE_LOCATION)
+            }
+        }
+    }
+
+    private fun fetchLocation() {
+        // Calling from lifecycleScope ensures the fusedLocationHelper suspending function will be cancelled
+        // if the fragment is destroyed before the coroutine completes.
+        viewLifecycleOwner.lifecycleScope.launch {
+            when (val result = fusedLocationHelper.getCurrentLocation()) {
+                is Ok -> {
+                    result.value.let { latLng ->
+                        viewModel.setCurrentLocation(latLng)
+                        _binding?.enterCityEditText?.let {
+                            it.setText(getString(R.string.current_location))
+                            // Change the color of the text to indicate that the location is current
+                            it.setTextColor(ContextCompat.getColor(requireContext(), R.color.light_blue))
+                        }
+                        Toast.makeText(requireContext(), "Getting weather from current Location", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                is Err -> {
+                    Timber.e(result.error)
+                    Toast.makeText(requireContext(), "Could not get location automatically.", Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    Timber.e("Unexpected error)") // Should never happen
+                }
+            }
+        }
+    }
+
+
     private fun handlePlaceResult() {
         startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK && result.data != null) {
@@ -135,8 +200,9 @@ class WeatherFragment : Fragment() {
     }
 
     private fun observeWeather() {
-        // Could use a mediatorLiveData to combine the flows but for simplicity and readability
-        // we'll just observe each one individually.
+        // Could use a mediatorLiveData or state flow to combine the flows into a single state
+        // but for simplicity we'll just observe them separately. Allowing one call to fail and
+        // the other to succeed.
         viewModel.forecastCards.observe(viewLifecycleOwner) { weatherCards ->
             setForecast(weatherCards)
         }
@@ -195,7 +261,11 @@ class WeatherFragment : Fragment() {
 
     private fun showLoading(isLoading: Boolean) {
         Timber.d("Loading: $isLoading")
-        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        if (isLoading) {
+            binding.progressBar.visibility = View.VISIBLE
+        } else {
+            binding.progressBar.visibility = View.GONE
+        }
     }
 
     override fun onDestroyView() {

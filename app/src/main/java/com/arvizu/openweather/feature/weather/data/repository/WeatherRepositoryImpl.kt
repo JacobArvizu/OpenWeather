@@ -1,5 +1,6 @@
 package com.arvizu.openweather.feature.weather.data.repository
 
+import com.arvizu.openweather.common.data.model.Location
 import com.arvizu.openweather.common.util.helpers.SharedPreferencesHelper
 import com.arvizu.openweather.feature.weather.data.datasource.WeatherDataSource
 import com.arvizu.openweather.feature.weather.data.mapper.WeatherResponseMapper
@@ -13,7 +14,7 @@ import javax.inject.Inject
 class WeatherRepositoryImpl @Inject constructor(
     private val weatherDataSource: WeatherDataSource,
     private val weatherResponseMapper: WeatherResponseMapper,
-    private val sharedPreferencesHelper: SharedPreferencesHelper
+    private val sharedPreferencesHelper: SharedPreferencesHelper,
 ): WeatherRepository {
     override suspend fun getCurrentWeather(latLng: Pair<Double, Double>): Result<WeatherDTO, Exception> {
         return when (val result = weatherDataSource.getCurrentWeather(latLng, sharedPreferencesHelper.preferredMeasurementUnit)) {
@@ -28,6 +29,7 @@ class WeatherRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getForecast(latLng: Pair<Double, Double>): Result<List<WeatherDTO>, Exception> {
+
         return when (val result = weatherDataSource.getForecast(latLng, sharedPreferencesHelper.preferredMeasurementUnit)) {
             is Ok -> {
                 val timeZone = result.value.city.timezone ?: ZonedDateTime.now().offset.totalSeconds
