@@ -1,6 +1,5 @@
 package com.arvizu.openweather.feature.weather.data.repository
 
-import com.arvizu.openweather.common.data.model.Location
 import com.arvizu.openweather.common.util.helpers.SharedPreferencesHelper
 import com.arvizu.openweather.feature.weather.data.datasource.WeatherDataSource
 import com.arvizu.openweather.feature.weather.data.mapper.WeatherResponseMapper

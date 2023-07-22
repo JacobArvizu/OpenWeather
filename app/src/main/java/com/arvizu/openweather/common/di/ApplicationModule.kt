@@ -4,6 +4,11 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import com.arvizu.openweather.common.data.model.AppSettings
+import com.arvizu.openweather.common.data.repository.AppRepository
+import com.arvizu.openweather.common.data.repository.AppRepositoryImpl
+import com.arvizu.openweather.common.use_case.AppUseCases
+import com.arvizu.openweather.common.use_case.GetLocationPreferencesUseCase
+import com.arvizu.openweather.common.use_case.SetLocationPreferencesUseCase
 import com.arvizu.openweather.common.util.helpers.AppSettingsSerializer
 import com.arvizu.openweather.common.util.helpers.SharedPreferencesHelper
 import com.arvizu.openweather.common.util.helpers.SharedPreferencesHelperImpl
@@ -20,6 +25,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import javax.inject.Singleton
 
+// DataStore delegate property
 private val Context.dataStore by dataStore(
     fileName = "user_preferences",
     serializer = AppSettingsSerializer,
@@ -45,6 +51,21 @@ object ApplicationModule {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun providesAppRepository(dataStore: DataStore<AppSettings>): AppRepository {
+        return AppRepositoryImpl(dataStore)
+    }
+
+    @Provides
+    @Singleton
+    fun providesAppUseCases(appRepository: AppRepository): AppUseCases {
+        return AppUseCases(
+            SetLocationPreferencesUseCase(appRepository),
+            GetLocationPreferencesUseCase(appRepository)
+        )
     }
 
     @Provides

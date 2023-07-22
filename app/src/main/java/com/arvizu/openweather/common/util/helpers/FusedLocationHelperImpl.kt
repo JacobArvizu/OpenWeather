@@ -13,9 +13,9 @@ import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 /**
- * A helper class to encapsulate the interactions with the Fused Location Provider for obtaining the current location.
+ * A helper class to encapsulate the interactions with the Fused LocationEntity Provider for obtaining the current locationEntity.
  *
- * Generally, we aim to separate business logic from views (Activities, Fragments). However, when dealing with functionalities like location services,
+ * Generally, we aim to separate business logic from views (Activities, Fragments). However, when dealing with functionalities like locationEntity services,
  * where the activity context is needed to check and request permissions.
  *
  * This class is a solution to this dilemma. It uses dependency injection to access activity context safely and uses this context to work with the
@@ -34,12 +34,12 @@ class FusedLocationHelperImpl (
         ) == PackageManager.PERMISSION_GRANTED
 
         return if (hasLocationPermission) {
-            Timber.d("Location permission granted")
+            Timber.d("LocationEntity permission granted")
             val location = fusedLocationProviderClient.lastLocation.await()
             Ok(Pair(location.latitude, location.longitude))
         } else {
-            Timber.d("Location permission not granted")
-            Err(Exception("Location permission not granted"))
+            Timber.d("LocationEntity permission not granted")
+            Err(Exception("LocationEntity permission not granted"))
         }
     }
 }

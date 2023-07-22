@@ -2,7 +2,6 @@ package com.arvizu.openweather.common.util.helpers
 
 import androidx.datastore.core.Serializer
 import com.arvizu.openweather.common.data.model.AppSettings
-import com.arvizu.openweather.common.util.constants.AppConstants
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.io.InputStream
@@ -11,8 +10,7 @@ import java.io.OutputStream
 object AppSettingsSerializer: Serializer<AppSettings> {
     override val defaultValue: AppSettings
         get() = AppSettings(
-            units = AppConstants.MEASUREMENT_UNIT_IMPERIAL,
-            location = null
+            locationEntity = null
         )
     override suspend fun readFrom(input: InputStream): AppSettings {
         return try {

@@ -37,6 +37,8 @@ class WeatherViewModel @Inject constructor(
         private const val KEY_LAT_LNG = "current_place"
     }
 
+    private val _hasCachedLocation = MutableLiveData<Boolean>()
+    val hasCachedLocation: LiveData<Boolean> get() = _hasCachedLocation
 
     private val _currentWeatherCard = MutableLiveData<WeatherCard>()
     val currentWeatherCard: LiveData<WeatherCard> = _currentWeatherCard
@@ -80,14 +82,14 @@ class WeatherViewModel @Inject constructor(
      * Launches two coroutines to get the current weather and forecast data, these functions
      * will be launched under the viewModel scope and run in parallel.
      */
-    private fun getAllWeatherData() = launchSafe {
+    fun getAllWeatherData() = launchSafe {
         val latLng = savedStateHandle.get<Pair<Double, Double>>(KEY_LAT_LNG)!!
         _loading.value = true
         val getCurrentWeather = async { getCurrentWeather(latLng) }
         val getForecast = async { getForecast(latLng) }
         getCurrentWeather.await()
         getForecast.await()
-        appUseCases.setLocationPreferencesUseCase.execute(latLng.first, latLng.second, _placeAddress.value!!)
+        appUseCases.setLocationPreferencesUseCase.execute(latLng.first, latLng.second, _placeAddress.value?:"")
         _loading.postValue(false)
     }
 
@@ -121,6 +123,23 @@ class WeatherViewModel @Inject constructor(
         if (savedStateHandle.contains(KEY_LAT_LNG)) {
             Timber.d("Changing weather unit to $measurementUnitMetric")
             getAllWeatherData()
+        }
+    }
+
+    fun checkForCachedLocation() = launchSafe {
+        // Can set to inline but easier to debug this way
+        val result = appUseCases.getLocationPreferencesUseCase.execute()
+        when(result) {
+            is Ok -> {
+                val locationEntity = result.value
+                _placeAddress.postValue(locationEntity.city)
+                savedStateHandle[KEY_LAT_LNG] = Pair(locationEntity.latitude, locationEntity.longitude)
+                _hasCachedLocation.value = true
+            }
+            is Err -> {
+                Timber.d("No cached location found")
+                _hasCachedLocation.value = false
+            }
         }
     }
 }

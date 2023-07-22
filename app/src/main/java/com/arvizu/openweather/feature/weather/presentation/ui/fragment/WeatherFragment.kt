@@ -27,7 +27,7 @@ import coil.load
 import com.arvizu.openweather.R
 import com.arvizu.openweather.common.util.constants.AppConstants
 import com.arvizu.openweather.common.util.helpers.FusedLocationHelper
-import com.arvizu.openweather.databinding.FragmentMainBinding
+import com.arvizu.openweather.databinding.FragmentWeatherBinding
 import com.arvizu.openweather.feature.places.util.GooglePlacesClient
 import com.arvizu.openweather.feature.weather.presentation.ui.adapter.WeatherCardAdapter
 import com.arvizu.openweather.feature.weather.presentation.ui.adapter.model.WeatherCard
@@ -53,7 +53,7 @@ class WeatherFragment : Fragment() {
     @Inject
     lateinit var fusedLocationHelper: FusedLocationHelper
 
-    private var _binding: FragmentMainBinding? = null
+    private var _binding: FragmentWeatherBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: WeatherViewModel by viewModels()
@@ -64,12 +64,7 @@ class WeatherFragment : Fragment() {
 
     private val requestPermissionLauncher: ActivityResultLauncher<String> by lazy {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                Timber.d("Location permission granted from request")
-                fetchLocation()
-            } else {
-                Timber.d("Location permission denied from request")
-            }
+            handleLocationCheck()
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,7 +76,7 @@ class WeatherFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentMainBinding.inflate(inflater, container, false)
+        _binding = FragmentWeatherBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -89,7 +84,21 @@ class WeatherFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initViews()
         observeWeather()
-        handleLocationCheck()
+        checkLocationPermission()
+    }
+
+    private fun checkLocationPermission() {
+        when (PackageManager.PERMISSION_GRANTED) {
+            ContextCompat.checkSelfPermission(
+                requireActivity(),
+                ACCESS_FINE_LOCATION
+            ) -> {
+                handleLocationCheck()
+            }
+            else -> {
+                requestPermissionLauncher.launch(ACCESS_FINE_LOCATION)
+            }
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility") // No need to override the class/view for simple use case
@@ -144,21 +153,22 @@ class WeatherFragment : Fragment() {
         recyclerView.adapter = weatherAdapter
     }
 
+    /*
+     * If the user has a cached locationEntity, we'll use that to get the weather data.
+     * Otherwise we'll try to get the current locationEntity if the user has granted location permissions
+     */
     private fun handleLocationCheck() {
-        when (PackageManager.PERMISSION_GRANTED) {
-            ContextCompat.checkSelfPermission(
-                requireActivity(),
-                ACCESS_FINE_LOCATION
-            ) -> {
-                fetchLocation()
-            }
-            else -> {
-                requestPermissionLauncher.launch(ACCESS_FINE_LOCATION)
+        viewModel.hasCachedLocation.observe(viewLifecycleOwner) { hasCachedLocation ->
+            if (hasCachedLocation) {
+                viewModel.getAllWeatherData()
+            } else {
+                fetchCurrentLocation()
             }
         }
+        viewModel.checkForCachedLocation()
     }
 
-    private fun fetchLocation() {
+    private fun fetchCurrentLocation() {
         // Calling from lifecycleScope ensures the fusedLocationHelper suspending function will be cancelled
         // if the fragment is destroyed before the coroutine completes.
         viewLifecycleOwner.lifecycleScope.launch {
@@ -171,12 +181,11 @@ class WeatherFragment : Fragment() {
                             // Change the color of the text to indicate that the location is current
                             it.setTextColor(ContextCompat.getColor(requireContext(), R.color.light_blue))
                         }
-                        Toast.makeText(requireContext(), "Getting weather from current Location", Toast.LENGTH_SHORT).show()
                     }
                 }
                 is Err -> {
                     Timber.e(result.error)
-                    Toast.makeText(requireContext(), "Could not get location automatically.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Could not get location automatically, please check permissions", Toast.LENGTH_SHORT).show()
                 }
                 else -> {
                     Timber.e("Unexpected error)") // Should never happen
@@ -189,6 +198,7 @@ class WeatherFragment : Fragment() {
     private fun handlePlaceResult() {
         startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                binding.enterCityEditText.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
                 viewModel.processPlaceFromIntent(result.data!!)
             } else if (result.resultCode == AutocompleteActivity.RESULT_ERROR) {
                 viewModel.handleErrorFromIntent(result.data!!)
@@ -212,6 +222,8 @@ class WeatherFragment : Fragment() {
         viewModel.errorObs.observe(viewLifecycleOwner) {error ->
             showError(error)
         }
+        // Loading should sync with the recyclerview loading state as that may actually take longer
+        // than the network call however this is a minor UI/UX issue.
         viewModel.loading.observe(viewLifecycleOwner) {isLoading ->
             showLoading(isLoading)
         }
