@@ -19,10 +19,9 @@ The app follows a clean architecture approach.
 3. **Location Search**: Enter the name of a city to get the weather information for that location.
 
 4. **Data Persistence**: The app uses Jetpack DataStore for data persistence, storing your latest search and location data, providing you with relevant weather information each time you open the app.
+  
 
-# Key  
-
-Data Layer
+## Data Layer
 
 At the heart of the app, the data layer is responsible for fetching data from the OpenWeather API and storing the data locally for offline use. This layer is further divided into the following sub-layers:
 
