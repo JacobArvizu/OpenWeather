@@ -31,13 +31,13 @@ Local: This is responsible for local data persistence. The app uses Jetpack Data
 
 Repository: This is responsible for deciding whether to fetch data from the network or use locally stored data. It's the single source of truth for data in the app and provides a clean API for the upper layers (domain and presentation) to use.
 
-Domain Layer
+## Domain Layer
 The domain layer contains all the business logic of the application. It defines use cases, which are single pieces of functionality that the app can perform. The domain layer is independent of the data source, meaning it doesn't know where the data comes from (the OpenWeather API, the local database, etc.). This allows for clear separation of concerns and easier testing.
 
-Presentation Layer
+## Presentation Layer
 The presentation layer handles the UI of the app, following the MVVM pattern. It contains the View (represented by Activities and Fragments) and the ViewModel. The ViewModel fetches data from the use cases defined in the domain layer and transforms it into a form that can be easily displayed by the View. The View observes data in the ViewModel and updates the UI accordingly.
 
 The OpenWeather app leverages several Jetpack libraries to implement the presentation layer, including LiveData for data observation, Navigation Component for in-app navigation, and View Binding for easier interaction with Views.
 
-Dependency Injection
+## Dependency Injection
 To manage dependencies across the app, we use Hilt, a dependency injection library built on top of Dagger. Hilt simplifies the implementation of DI and reduces boilerplate code, making the codebase cleaner and easier to understand.
